@@ -18,7 +18,7 @@ public class Window {
      private long glfwWindow;
      public float r,g,b,a;
 
-     private static Scene curentScene;
+     private static Scene currentScene;
     private String title;
     private Window(){
         this.width = 800;
@@ -33,11 +33,12 @@ public class Window {
     public static void changeScene(int newScene){
         switch (newScene){
             case 0:
-                curentScene = new LevelEditorScene();
-                //currentScene.init();
+                currentScene = new LevelEditorScene();
+                currentScene.init();
                 break;
             case 1:
-                curentScene = new LevelScene();
+                currentScene = new LevelScene();
+                currentScene.init();
                 break;
             default:
                 assert false : "Unknow Scene ' "+ newScene + " ' ";
@@ -126,7 +127,7 @@ public class Window {
             glClear(GL_COLOR_BUFFER_BIT);
 
             if(dt >= 0) {
-                curentScene.update(dt);
+                currentScene.update(dt);
             }
 
             //Swap the color buffers
