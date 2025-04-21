@@ -1,9 +1,11 @@
 package MaverickEngine;
 
+import Util.Time;
 import org.lwjgl.Version;
 import org.lwjgl.glfw.GLFWErrorCallback;
 import org.lwjgl.opengl.GL;
 
+import static org.lwjgl.glfw.Callbacks.glfwFreeCallbacks;
 import static org.lwjgl.glfw.GLFW.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
@@ -14,11 +16,34 @@ public class Window {
 
      private int width, height;
      private long glfwWindow;
+     public float r,g,b,a;
+
+     private static Scene curentScene;
     private String title;
     private Window(){
         this.width = 800;
         this.height = 600;
         this.title = "Mario";
+        r=1;
+        g=1;
+        b=1;
+        a=1;
+    }
+
+    public static void changeScene(int newScene){
+        switch (newScene){
+            case 0:
+                curentScene = new LevelEditorScene();
+                //currentScene.init();
+                break;
+            case 1:
+                curentScene = new LevelScene();
+                break;
+            default:
+                assert false : "Unknow Scene ' "+ newScene + " ' ";
+                break;
+        }
+
     }
 
     public static Window get(){
@@ -32,6 +57,14 @@ public class Window {
         System.out.println("Hello LWJGL " + Version.getVersion() + "!");
         init();
         loop();
+
+        //Free the window callbacks and destroy the window
+        glfwFreeCallbacks(glfwWindow);
+        glfwDestroyWindow(glfwWindow);
+
+        //Terminate GLFW and free the error callback
+        glfwTerminate();
+        glfwSetErrorCallback(null).free();
     }
 
     public void init(){
@@ -55,6 +88,11 @@ public class Window {
             throw new IllegalStateException("Failed to create the GLFW window");
         }
 
+        glfwSetCursorPosCallback(glfwWindow, MouseListener::MousePosCallback);
+        glfwSetMouseButtonCallback(glfwWindow, MouseListener::MouseButtonCallback);
+        glfwSetScrollCallback(glfwWindow, MouseListener::MouseScrollCallback);
+        glfwSetKeyCallback(glfwWindow, KeyListener::keyCallback);
+
         //Make the OPenGL context current
         glfwMakeContextCurrent(glfwWindow);
         //Enable v-sync
@@ -70,19 +108,33 @@ public class Window {
         // bindings available for use.
         GL.createCapabilities();
 
+        Window.changeScene(0);
+
     }
 
     public void loop(){
+        float beginTime = Time.getTime();
+        float endTime;
+        float dt = -1.0f;
+
         while(!glfwWindowShouldClose(glfwWindow)){
             //Poll for window events
             glfwPollEvents();
 
             //Clear the window
-            glClearColor(1.0f, 0.0f, 0.0f, 1.0f);
+            glClearColor(r,g,b,a);
             glClear(GL_COLOR_BUFFER_BIT);
+
+            if(dt >= 0) {
+                curentScene.update(dt);
+            }
 
             //Swap the color buffers
             glfwSwapBuffers(glfwWindow);
+
+            endTime = Time.getTime();
+            dt = endTime-beginTime;
+            beginTime = endTime;
         }
 
     }
