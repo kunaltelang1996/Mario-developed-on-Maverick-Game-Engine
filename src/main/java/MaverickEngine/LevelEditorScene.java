@@ -1,6 +1,8 @@
 package MaverickEngine;
 
 import Renderer.Shader;
+import Renderer.Texture;
+import Util.Time;
 import org.joml.Vector2f;
 import org.lwjgl.BufferUtils;
 
@@ -16,12 +18,13 @@ public class LevelEditorScene extends Scene{
     private int vaoId, vboId, eboId;
 
     private Shader defaultShader;
+    private Texture texture;
 
     private float vertexArray[] ={
-            100.5f,-100.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, //Bottom right
-            -100.5f,100.5f,0.0f, 0.0f, 1.0f, 0.0f, 1.0f,  //Top Left
-            100.5f, 100.5f,0.0f, 1.0f, 0.0f, 1.0f, 1.0f,  //Top right
-            -100.5f, -100.5f,0.0f, 1.0f, 1.0f, 0.0f, 1.0f,  //Bottom left
+            100.5f,-100.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f,  1,1,  //Bottom right
+            -100.5f,100.5f,0.0f,   0.0f, 1.0f, 0.0f, 1.0f,  0,0,  //Top Left
+            100.5f, 100.5f,0.0f,   1.0f, 0.0f, 1.0f, 1.0f,  1,0,  //Top right
+            -100.5f, -100.5f,0.0f, 1.0f, 1.0f, 0.0f, 1.0f,  0,1   //Bottom left
     };
 
     //Must be in counter-clockwise direction
@@ -40,10 +43,18 @@ public class LevelEditorScene extends Scene{
     public void update(float deltaTime){
 
         camera.position.x -= deltaTime * 50.0f;
+        camera.position.y -= deltaTime * 20.0f;
 
         defaultShader.use();
+
+        //Upload texture to the shader
+        defaultShader.uploadTexture("tex_sampler",0);
+        glActiveTexture(GL_TEXTURE0);
+        texture.bind();
+
         defaultShader.uploadMat4f("uProjection", camera.getProjectionMatrix());
         defaultShader.uploadMat4f("uView", camera.getViewMatrix());
+        defaultShader.uploadFloat("uTime", Time.getTime());
         //Bind VAO
         glBindVertexArray(vaoId);
 
@@ -68,6 +79,8 @@ public class LevelEditorScene extends Scene{
 
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.linkAndCompile();
+
+        this.texture = new Texture("assets/Images/download.jpg");
 
         //==========================================================================
         //Generate VAO, VBO and EBO buffer objects, and send data to GPU
@@ -97,14 +110,16 @@ public class LevelEditorScene extends Scene{
         //Add the vertex attribute pointers
         int positionSize = 3;
         int colorSize = 4;
-        int floatSizeBytes = 4;
-        int vertexSizeBytes = (positionSize + colorSize) * floatSizeBytes;
+        int uvSize = 2;
+        int vertexSizeBytes = (positionSize + colorSize + uvSize) * Float.BYTES;
         glVertexAttribPointer(0, positionSize, GL_FLOAT, false, vertexSizeBytes, 0);
         glEnableVertexAttribArray(0);
 
-        glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionSize * floatSizeBytes);
+        glVertexAttribPointer(1, colorSize, GL_FLOAT, false, vertexSizeBytes, positionSize * Float.BYTES);
         glEnableVertexAttribArray(1);
 
+        glVertexAttribPointer(2,uvSize, GL_FLOAT, false, vertexSizeBytes, (positionSize + colorSize) * Float.BYTES);
+        glEnableVertexAttribArray(2);
 
     }
 
