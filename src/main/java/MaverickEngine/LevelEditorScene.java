@@ -1,5 +1,7 @@
 package MaverickEngine;
 
+import Components.FontRenderer;
+import Components.SpriteRenderer;
 import Renderer.Shader;
 import Renderer.Texture;
 import Util.Time;
@@ -19,6 +21,9 @@ public class LevelEditorScene extends Scene{
 
     private Shader defaultShader;
     private Texture texture;
+
+    GameObject testObject;
+    private boolean firstTime = false;
 
     private float vertexArray[] ={
             100.5f,-100.5f, 0.0f,  1.0f, 0.0f, 0.0f, 1.0f,  1,1,  //Bottom right
@@ -42,8 +47,8 @@ public class LevelEditorScene extends Scene{
     @Override
     public void update(float deltaTime){
 
-        camera.position.x -= deltaTime * 50.0f;
-        camera.position.y -= deltaTime * 20.0f;
+//        camera.position.x -= deltaTime * 50.0f;
+//        camera.position.y -= deltaTime * 20.0f;
 
         defaultShader.use();
 
@@ -70,12 +75,28 @@ public class LevelEditorScene extends Scene{
 
         glBindVertexArray(0);
         defaultShader.detach();
+        if(!firstTime) {
+            System.out.println("Creating Game object");
+            GameObject go = new GameObject("Game Test 2");
+            go.addComponent(new SpriteRenderer());
+            this.addGameObjectToScene(go);
+            firstTime = true;
+        }
+
+        for(GameObject gameObject : this.gameObjects){
+            gameObject.update(deltaTime);
+        }
     }
 
     @Override
     public void init(){
+        System.out.println("Creatng Test Object");
+        this.testObject = new GameObject("Test Object");
+        this.testObject.addComponent(new SpriteRenderer());
+        this.testObject.addComponent(new FontRenderer());
+        this.addGameObjectToScene(this.testObject);
 
-        this.camera = new Camera(new Vector2f());
+        this.camera = new Camera(new Vector2f(-600,-300));
 
         defaultShader = new Shader("assets/shaders/default.glsl");
         defaultShader.linkAndCompile();
