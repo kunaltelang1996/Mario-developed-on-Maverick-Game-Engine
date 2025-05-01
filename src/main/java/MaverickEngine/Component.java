@@ -3,6 +3,7 @@ package MaverickEngine;
 public abstract class Component {
     public GameObject gameObject = null;
 
+
     public void start(){
 
     }

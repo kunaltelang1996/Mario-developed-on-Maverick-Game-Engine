@@ -7,10 +7,19 @@ public class GameObject {
 
     private String name;
     private List<Component> component;
+    public Transform trans;
     public GameObject(String name) {
         // Constructor logic here
         this.name = name;
         this.component = new ArrayList<>();
+        this.trans = new Transform();
+    }
+
+    public GameObject(String name, Transform trans) {
+        // Constructor logic here
+        this.name = name;
+        this.component = new ArrayList<>();
+        this.trans = trans;
     }
 
     public <T extends Component> T getComponent(Class<T> componentClass) {
